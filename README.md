@@ -4,8 +4,7 @@
 
 To install the Tsyganenko python module run:  
 
-    make clean
-    sudo make
+    sudo python setup.py install
 
 ## Use
 
