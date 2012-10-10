@@ -2,8 +2,12 @@
 
 ## Installation
 
-To install the Tsyganenko python module run:  
+To install the Tsyganenko python module, from this directory run:  
 
+    cd tsyganenko
+    make clean
+    make
+    cd ..
     sudo python setup.py install
 
 ## Use
