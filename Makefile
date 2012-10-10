@@ -9,6 +9,6 @@ all:
 	python setup.py install
 
 clean:
-	find -type f -name "*.o" | xargs rm -f
-	find -type f -name "*.so" | xargs rm -f
+	find . -type f -name "*.o" | xargs rm -f
+	find . -type f -name "*.so" | xargs rm -f
 	# find ${DIR} -type f -name "*.pyf" | xargs rm -f
