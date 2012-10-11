@@ -82,7 +82,7 @@ ax = trace.plot3d()
         self.byimf = byimf
         self.bzimf = bzimf
         # If no datetime is provided, defaults to today
-        if not datetime: datetime = pydt.utcnow()
+        if datetime==None: datetime = pydt.utcnow()
         self.datetime = datetime
 
         iTest = self.__test_valid__()
@@ -143,7 +143,7 @@ ax = trace.plot3d()
         if rho: _rho = self.rho
         if coords: _coords = self.coords
         if vswgse: _vswgse = self.vswgse
-        if datetime: _datetime = self.datetime
+        if not datetime==None: _datetime = self.datetime
 
         # Pass position if new
         if lat: self.lat = lat
@@ -152,13 +152,13 @@ ax = trace.plot3d()
         lon = self.lon
         if rho: self.rho = rho
         rho = self.rho
-        if datetime: self.datetime = datetime
+        if not datetime==None: self.datetime = datetime
         datetime = self.datetime
 
         # Set necessary parameters if new
         if coords: self.coords = coords
         coords = self.coords
-        if datetime: self.datetime = datetime
+        if not datetime==None: self.datetime = datetime
         datetime = self.datetime
         if vswgse: self.vswgse = vswgse
         vswgse = self.vswgse
@@ -179,7 +179,7 @@ ax = trace.plot3d()
             if rho: self.rho = _rho
             if coords: self.coords = _coords 
             if vswgse: self.vswgse = _vswgse
-            if datetime: self.datetime = _datetime
+            if not datetime==None: self.datetime = _datetime
 
         # Declare the same Re as used in Tsyganenko models [km]
         Re = 6371.2
