@@ -325,9 +325,8 @@ bzimf={:3.0f}                       [nT]
         """
         import cPickle as pickle
 
-        fileObj = open( filename, "wb" )
-
-        pickle.dump(self, fileObj)
+        with open( filename, "rb" ) as fileObj:
+            pickle.dump(self, fileObj)
 
 
     def load(self, filename):
@@ -338,32 +337,10 @@ bzimf={:3.0f}                       [nT]
         """
         import cPickle as pickle
 
-        fileObj = open( filename, "rb" )
-        
-        obj = pickle.load(fileObj)
-        self.lat = obj.lat
-        self.lon = obj.lon
-        self.rho = obj.rho
-        self.coords = obj.coords
-        self.vswgse = obj.vswgse
-        self.pdyn = obj.pdyn
-        self.dst = obj.dst
-        self.byimf = obj.byimf
-        self.bzimf = obj.bzimf
-        self.datetime = obj.datetime
-        self.l = obj.l
-        self.xTrace = obj.xTrace
-        self.yTrace = obj.yTrace
-        self.zTrace = obj.zTrace
-        self.xGsw = obj.xGsw
-        self.yGsw = obj.yGsw
-        self.zGsw = obj.zGsw
-        self.latNH = obj.latNH
-        self.lonNH = obj.lonNH
-        self.rhoNH = obj.rhoNH
-        self.latSH = obj.latSH
-        self.lonSH = obj.lonSH
-        self.rhoSH = obj.rhoSH
+        with open( filename, "rb" ) as fileObj:
+            obj = pickle.load(fileObj)
+            for k, v in obj.__dict__.items():
+                self.__dict__[k] = v
 
 
     def plot(self, proj='xz', color='b', onlyPts=None, showPts=False, 
