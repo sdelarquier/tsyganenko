@@ -4,7 +4,7 @@
 
 Though edits had to be made to the fortran code to accomodate f2py compilation, all fortran files and their scientific content have been developped by N.A. Tsyganenko and colleagues.
 
-I am only responsible for the python wrappers, which provide a convenient python object to interface with the fortran subroutines.
+I am only responsible for the python wrappers, which provide a convenient python class as an interface with the fortran subroutines.
 
 ## Installation
 
