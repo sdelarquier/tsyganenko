@@ -16,13 +16,13 @@ sudo is NOT needed or desired::
 
 Use
 ====
-To use this module, simply follow the example provided in the tsygTrace object docstring::
+To use this module, simply follow the example provided in the tsygTrace object docstring, or try::
 
-    import tsyganenko
-    tsyganenko.tsygTrace?
+    python demo.py
 
-You can also use ipython notbook to visualize a more detailed example::
+You can also use Jupyter notbook to visualize a more detailed example::
 
-    ipython notebook --pylab=inline
+    jupyter notebook
 
-If you run the above command from this repository you should see a notebook called 'Tsyganenko - Python examples'. If you run the above command from anywhere on your computer, you can drag and drop the file called 'Tsyganenko - Python examples.ipynb' to the notebok dashboard.
+If you run the above command from this repository you should see a notebook called
+'Tsyganenko - Python examples'.
