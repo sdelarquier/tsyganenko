@@ -7,20 +7,20 @@ MODULE: tsyganenko
 This modules containes the following object(s):
 
   tsygTrace: Wraps fortran subroutines in one convenient class
-  
+
 This module contains the following module(s):
 
   tsygFort: Fortran subroutines
- 
+
 Written by Sebastien de Larquier 2012-10
-    
+
 *******************************
 """
 
 import tsygFort
 
 class tsygTrace(object):
-    def __init__(self, lat=None, lon=None, rho=None, filename=None, 
+    def __init__(self, lat=None, lon=None, rho=None, filename=None,
         coords='geo', datetime=None,
         vswgse=[-400.,0.,0.], pdyn=2., dst=-5., byimf=0., bzimf=-5.,
         lmax=5000, rmax=60., rmin=1., dsmax=0.01, err=0.000001):
@@ -77,10 +77,8 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
 |   Written by Sebastien 2012-10
         """
         from datetime import datetime as pydt
-
-        assert (None not in [lat, lon, rho]) or filename, 'You must provide either (lat, lon, rho) or a filename to read from'
-
-        if None not in [lat, lon, rho]: 
+                
+        if not None in [lat, lon, rho]:
             self.lat = lat
             self.lon = lon
             self.rho = rho
@@ -101,6 +99,8 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
 
         elif filename:
             self.load(filename)
+        else:
+            raise RuntimeError('You must provide either (lat, lon, rho) or a filename to read from')
 
 
     def __test_valid__(self):
@@ -131,7 +131,7 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
         # Make sure they're all the sam elength
         assert (len(self.lat) == len(self.lon) == len(self.rho) == len(self.datetime)), \
             'lat, lon, rho and datetime must me the same length'
-        
+
         return True
 
 
@@ -145,7 +145,7 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
 |
 |   Written by Sebastien 2012-10
         """
-        from numpy import radians, degrees, zeros
+        from numpy import radians, degrees, zeros, zeros_like
 
         # Store existing values of class attributes in case something is wrong
         # and we need to revert back to them
@@ -184,34 +184,34 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
 
         # Test that everything is in order, if not revert to existing values
         iTest = self.__test_valid__()
-        if not iTest: 
+        if not iTest:
             if lat: self.lat = _lat
-            if lon: _self.lon = lon
+            if lon: self.lon = lon
             if rho: self.rho = _rho
-            if coords: self.coords = _coords 
+            if coords: self.coords = _coords
             if vswgse: self.vswgse = _vswgse
             if not datetime==None: self.datetime = _datetime
 
         # Declare the same Re as used in Tsyganenko models [km]
         Re = 6371.2
-        
+
         # Initialize trace array
-        self.l = zeros(len(lat))
+        self.l = zeros(len(lat),dtype=int)
         self.xTrace = zeros((len(lat),2*lmax))
         self.yTrace = self.xTrace.copy()
         self.zTrace = self.xTrace.copy()
-        self.xGsw = self.l.copy()
-        self.yGsw = self.l.copy()
-        self.zGsw = self.l.copy()
-        self.latNH = self.l.copy()
-        self.lonNH = self.l.copy()
-        self.rhoNH = self.l.copy()
-        self.latSH = self.l.copy()
-        self.lonSH = self.l.copy()
-        self.rhoSH = self.l.copy()
+        self.xGsw =  zeros(len(lat),dtype=float)
+        self.yGsw =  zeros_like(self.xGsw)
+        self.zGsw =  zeros_like(self.xGsw)
+        self.latNH = zeros_like(self.xGsw)
+        self.lonNH = zeros_like(self.xGsw)
+        self.rhoNH = zeros_like(self.xGsw)
+        self.latSH = zeros_like(self.xGsw)
+        self.lonSH = zeros_like(self.xGsw)
+        self.rhoSH = zeros_like(self.xGsw)
 
         # And now iterate through the desired points
-        for ip in xrange(len(lat)):
+        for ip in range(len(lat)):
             # This has to be called first
             tsygFort.recalc_08(datetime[ip].year,datetime[ip].timetuple().tm_yday,
                                 datetime[ip].hour,datetime[ip].minute,datetime[ip].second,
@@ -243,7 +243,7 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
                                                                 parmod, exmod, inmod,
                                                                 lmax )
 
-                # Convert back to spherical geographic coords
+#%% Convert back to spherical geographic coords
                 xfgeo, yfgeo, zfgeo, xfgsw, yfgsw, zfgsw  = tsygFort.geogsw_08(
                                                                     0. ,0. ,0. ,
                                                                     xfgsw, yfgsw, zfgsw,
@@ -252,8 +252,7 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
                                                                     0., 0., 0.,
                                                                     xfgeo, yfgeo, zfgeo,
                                                                     -1)
-
-                # Get coordinates of traced point
+#%% Get coordinates of traced point
                 if mapto == 1:
                     self.latSH[ip] = 90. - degrees(geoColat)
                     self.lonSH[ip] = degrees(geoLon)
@@ -262,8 +261,7 @@ trace = tsyganenko.tsygTrace(filename='trace.dat')
                     self.latNH[ip] = 90. - degrees(geoColat)
                     self.lonNH[ip] = degrees(geoLon)
                     self.rhoNH[ip] = geoR*Re
-                    
-                # Store trace
+#%% Store trace
                 if mapto == -1:
                     self.xTrace[ip,0:l] = xarr[l-1::-1]
                     self.yTrace[ip,0:l] = yarr[l-1::-1]
@@ -304,14 +302,14 @@ bzimf={:3.0f}                       [nT]
         outstr += '(latitude [degrees], longitude [degrees], distance from center of the Earth [km])\n'
 
         # Print stuff
-        for ip in xrange(len(self.lat)):
+        for ip in range(len(self.lat)):
             outstr +=   '''
 ({:6.3f}, {:6.3f}, {:6.3f}) @ {}
     --> NH({:6.3f}, {:6.3f}, {:6.3f})
-    --> SH({:6.3f}, {:6.3f}, {:6.3f}) 
-                        '''.format(self.lat[ip], self.lon[ip], self.rho[ip], 
-                                   self.datetime[ip].strftime('%H:%M UT (%d-%b-%y)'), 
-                                   self.latNH[ip], self.lonNH[ip], self.rhoNH[ip], 
+    --> SH({:6.3f}, {:6.3f}, {:6.3f})
+                        '''.format(self.lat[ip], self.lon[ip], self.rho[ip],
+                                   self.datetime[ip].strftime('%H:%M UT (%d-%b-%y)'),
+                                   self.latNH[ip], self.lonNH[ip], self.rhoNH[ip],
                                    self.latSH[ip], self.lonSH[ip], self.rhoSH[ip])
 
         return outstr
@@ -343,12 +341,12 @@ bzimf={:3.0f}                       [nT]
                 self.__dict__[k] = v
 
 
-    def plot(self, proj='xz', color='b', onlyPts=None, showPts=False, 
+    def plot(self, proj='xz', color='b', onlyPts=None, showPts=False,
         showEarth=True, disp=True, **kwargs):
         """
 |   Generate a 2D plot of the trace projected onto a given plane
 |   Graphic keywords apply to the plot method for the field lines
-|   
+|
 |   **INPUTS**:
 |       **plane**: the projection plane in GSW coordinates
 |       **onlyPts**: if the trace countains multiple point, only show the specified indices (list)
@@ -357,15 +355,15 @@ bzimf={:3.0f}                       [nT]
 |       **disp**: invoke pylab.show()
 |       **color**: field line color
 |       **kwargs**: see matplotlib.axes.Axes.plot
-|   
+|
 |   **OUTPUTS**:
 |       **ax**: matplotlib axes object
 |
 |   Written by Sebastien 2012-10
         """
-        from pylab import gcf, gca, show
+        from pylab import gcf, show
         from matplotlib.patches import Circle
-        from numpy import pi, linspace, outer, ones, size, cos, sin, radians, cross
+        from numpy import cross
         from numpy.ma import masked_array
 
         assert (len(proj) == 2) or \
@@ -383,7 +381,7 @@ bzimf={:3.0f}                       [nT]
 
         # Select indices to show
         if onlyPts is None:
-            inds = xrange(len(self.lat))
+            inds = range(len(self.lat))
         else:
             try:
                 inds = [ip for ip in onlyPts]
@@ -424,21 +422,21 @@ bzimf={:3.0f}                       [nT]
                 ax.set_ylabel(r'$Z_{GSW}$')
                 ydir = [0,0,1]
             sign = 1 if -1 not in cross(xdir,ydir) else -1
-            if 'x' not in proj: 
+            if 'x' not in proj:
                 zz = sign*self.xGsw[ip]
                 indMask = sign*self.xTrace[ip,0:self.l[ip]] < 0
-            if 'y' not in proj: 
+            if 'y' not in proj:
                 zz = sign*self.yGsw[ip]
                 indMask = sign*self.yTrace[ip,0:self.l[ip]] < 0
-            if 'z' not in proj: 
+            if 'z' not in proj:
                 zz = sign*self.zGsw[ip]
                 indMask = sign*self.zTrace[ip,0:self.l[ip]] < 0
             # Plot
-            ax.plot(masked_array(xx, mask=~indMask), 
-                    masked_array(yy, mask=~indMask), 
+            ax.plot(masked_array(xx, mask=~indMask),
+                    masked_array(yy, mask=~indMask),
                     zorder=-1, color=color, **kwargs)
-            ax.plot(masked_array(xx, mask=indMask), 
-                    masked_array(yy, mask=indMask), 
+            ax.plot(masked_array(xx, mask=indMask),
+                    masked_array(yy, mask=indMask),
                     zorder=1, color=color, **kwargs)
             if showPts:
                 ax.scatter(xpt, ypt, c='k', s=40, zorder=zz)
@@ -448,12 +446,12 @@ bzimf={:3.0f}                       [nT]
         return ax
 
 
-    def plot3d(self, onlyPts=None, showEarth=True, showPts=False, disp=True, 
+    def plot3d(self, onlyPts=None, showEarth=True, showPts=False, disp=True,
         xyzlim=None, zorder=1, linewidth=2, color='b', **kwargs):
         """
 |   Generate a 3D plot of the trace
 |   Graphic keywords apply to the plot3d method for the field lines
-|   
+|
 |   **INPUTS**:
 |       **onlyPts**: if the trace countains multiple point, only show the specified indices (list)
 |       **showEarth**: Toggle Earth sphere visibility on/off
@@ -464,15 +462,15 @@ bzimf={:3.0f}                       [nT]
 |       **linewidth**: field line width
 |       **color**: field line color
 |       **kwargs**: see mpl_toolkits.mplot3d.axes3d.Axes3D.plot3D
-|   
+|
 |   **OUTPUTS**:
 |       **ax**: matplotlib axes object
 |
 |   Written by Sebastien 2012-10
         """
         from mpl_toolkits.mplot3d import proj3d
-        from numpy import pi, linspace, outer, ones, size, cos, sin, radians
-        from pylab import gca, gcf, show
+        from numpy import pi, linspace, outer, ones, size, cos, sin
+        from pylab import gcf, show
 
         fig = gcf()
         ax = fig.gca(projection='3d')
@@ -489,7 +487,7 @@ bzimf={:3.0f}                       [nT]
 
         # Select indices to show
         if onlyPts is None:
-            inds = xrange(len(self.lat))
+            inds = range(len(self.lat))
         else:
             try:
                 inds = [ip for ip in onlyPts]
@@ -500,7 +498,7 @@ bzimf={:3.0f}                       [nT]
         for ip in inds:
             ax.plot3D(  self.xTrace[ip,0:self.l[ip]],
                         self.yTrace[ip,0:self.l[ip]],
-                        self.zTrace[ip,0:self.l[ip]], 
+                        self.zTrace[ip,0:self.l[ip]],
                         zorder=zorder, linewidth=linewidth, color=color, **kwargs)
             if showPts:
                 ax.scatter3D(self.xGsw[ip], self.yGsw[ip], self.zGsw[ip], c='k')

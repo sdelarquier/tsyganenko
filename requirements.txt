@@ -1,0 +1,5 @@
+setuptools
+six
+nose
+numpy
+matplotlib
