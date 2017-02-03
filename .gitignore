@@ -1,3 +1,6 @@
+.ipynb_checkpoints/
+*.egg-info/
+*.pyf
 *~
 *.o
 *.pyc
