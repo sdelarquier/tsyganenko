@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import setuptools #needed to enable develop
-import subprocess
-
 try:
-    subprocess.call(['conda','install','--file','requirements.txt'])
+    import conda.cli
+    conda.cli.main('install','--file','requirements.txt')
 except Exception as e:
-    pass
+    print(e)
 
 from numpy.distutils.core import setup,Extension
 
